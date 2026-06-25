@@ -2,12 +2,14 @@
 Branche sur le service Q&A (Axe 3). Utilise un popover Streamlit positionne en CSS."""
 from __future__ import annotations
 import streamlit as st
+from ui.services import get_qa_service
 
 
-@st.cache_resource
-def _qa_service():
-    from features.analytics_qa.service import AnalyticsQAService
-    return AnalyticsQAService()
+def _fmt_row(row: dict, group_by: str | None, metric: str) -> str:
+    label = str(row.get(group_by, "—")) if group_by else ""
+    val = row.get(metric)
+    val_str = f"{val:,.0f}" if isinstance(val, (int, float)) else str(val)
+    return f"{label}: {val_str}" if label else val_str
 
 
 def render(df):
@@ -27,30 +29,28 @@ def render(df):
             with st.chat_message(role):
                 st.markdown(msg)
 
-        q = st.text_input("Votre question", key="chat_q",
-                          placeholder="Ex : top 3 des régions par CA en 2025",
-                          label_visibility="collapsed")
-        c1, c2 = st.columns([1, 1])
-        if c1.button("Envoyer", key="chat_send", use_container_width=True) and q.strip():
-            # Dédoublonnage : évite d'ajouter la même question si le bouton est recliqué
+        col_clear, _ = st.columns([1, 3])
+        if col_clear.button("Effacer", key="chat_clear", use_container_width=True):
+            st.session_state.chat_history = []
+            st.rerun()
+
+        q = st.chat_input("Posez votre question…", key="chat_q")
+        if q:
             last_user = next((m for r, m in reversed(st.session_state.chat_history) if r == "user"), None)
             if last_user != q:
                 st.session_state.chat_history.append(("user", q))
                 with st.spinner("Analyse en cours…"):
-                    res = _qa_service().answer(q, df)
+                    history = [{"role": r, "content": m} for r, m in st.session_state.chat_history[-6:]]
+                    res = get_qa_service().answer(q, df, history)
                 if res.ok:
                     ans = res.answer or "—"
-                    if res.rows:
+                    if res.rows and res.spec:
                         apercu = ", ".join(
-                            f"{list(r.values())[0]}: {list(r.values())[-1]:,.0f}"
-                            if isinstance(list(r.values())[-1], (int, float)) else str(r)
-                            for r in res.rows[:3])
+                            _fmt_row(r, res.spec.group_by, res.spec.metric)
+                            for r in res.rows[:3]
+                        )
                         ans += f"\n\n_{apercu}_"
                 else:
                     ans = f"Erreur : {res.error or 'indisponible'}"
                 st.session_state.chat_history.append(("assistant", ans))
-            st.session_state.chat_q = ""
-            st.rerun()
-        if c2.button("Effacer", key="chat_clear", use_container_width=True):
-            st.session_state.chat_history = []
             st.rerun()

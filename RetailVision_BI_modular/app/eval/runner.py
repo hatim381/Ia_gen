@@ -102,9 +102,18 @@ def eval_narration_case(case, text, judge):
     figs = M.figures_faithful(text, case.get("facts_figures_allowed", []))
     incl = M.contains_all(text, case.get("facts_must_include", []))
     forb = M.contains_none(text, case.get("forbidden_substrings", []))
+    kpis = case["kpis"]
     faith = judge.faithfulness(
-        facts=[f"region leader {case['kpis']['top_region']}", f"categorie leader {case['kpis']['top_categorie']}",
-               f"CA 2025 {case['kpis']['ca_2025']/1e6:.1f} M€", f"variation CA {case['kpis']['ca_delta_pct']:+.1f}%"],
+        facts=[
+            f"CA 2025 : {kpis['ca_2025']/1e6:.1f} M€",
+            f"Variation CA : {kpis['ca_delta_pct']:+.1f}%",
+            f"Variation transactions : {kpis['tx_delta_pct']:+.1f}%",
+            f"Marge 2025 : {kpis['marge_2025']:.1f}%",
+            f"Variation marge : {kpis['marge_delta_pts']:+.2f} pts",
+            f"Variation panier moyen : {kpis['panier_delta_pct']:+.1f}%",
+            f"Région leader : {kpis['top_region']}",
+            f"Catégorie leader : {kpis['top_categorie']}",
+        ],
         generated=text)
     nb = M.sentence_count(text)
     cons = judge.constraints(text, case.get("criteria", {}))

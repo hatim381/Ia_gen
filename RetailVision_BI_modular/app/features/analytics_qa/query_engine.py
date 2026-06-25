@@ -32,6 +32,8 @@ def validate(spec: QuerySpec) -> str | None:
         return f"catégorie inconnue : {spec.categorie}"
     if spec.year not in (None, 2024, 2025):
         return f"année hors périmètre : {spec.year}"
+    if spec.group_by == "mois" and not any([spec.year, spec.date_start, spec.date_end]):
+        return "group_by='mois' requiert une année ou une période (trop de données sinon)."
     for field in ("date_start", "date_end"):
         v = getattr(spec, field)
         if v is not None:

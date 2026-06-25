@@ -26,7 +26,7 @@ class MockJudge:
 
 class OllamaJudge:
     """Juge reel via Ollama local. Utilise format=json + temperature 0 (reproductibilite)."""
-    def __init__(self, model="gemma3:4b", timeout=30):
+    def __init__(self, model="gemma3:4b", timeout=240):
         self.model = model
         self.timeout = timeout
 

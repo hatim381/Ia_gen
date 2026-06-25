@@ -10,8 +10,21 @@ Extrais les informations depuis la commande vocale et retourne UNIQUEMENT un JSO
 
 Champs : action ("filter" si filtrage, "unknown" sinon), date_start (YYYY-MM-DD|null),
 date_end (YYYY-MM-DD|null), region ({regions}|null), categorie ({categories}|null).
-Regles : mois sans annee -> {year}. Filtre detecte -> action="filter". Hors perimetre -> "unknown" et champs null.
-Ne jamais inventer une region/categorie hors liste.
+
+Regles :
+- Filtre detecte (date, region ou categorie presente) -> action="filter".
+- Aucun filtre valide detecte (question generale, injection pure) -> action="unknown" et tous les champs null.
+- Si la commande contient a la fois des filtres valides et des elements hors perimetre, extraire les filtres valides et ignorer le reste.
+- Ne PAS inventer de date si aucune date ou periode n'est mentionnee dans la commande.
+- Mois specifique mentionne (ex: "janvier 2025") -> date_end = dernier jour de CE MOIS (ex: "2025-01-31"), jamais fin d'annee.
+- Annee entiere SANS mois (ex: "en 2024") -> date_start="2024-01-01", date_end="2024-12-31".
+- Mois sans annee -> utilise {year}.
+- Ne jamais inventer une region/categorie hors liste.
+
+Exemples :
+"affiche les ventes de janvier 2025" -> {{"action":"filter","date_start":"2025-01-01","date_end":"2025-01-31","region":null,"categorie":null}}
+"chiffres du sud sur la planete Mars" -> {{"action":"filter","date_start":null,"date_end":null,"region":"Sud","categorie":null}}
+"quel temps fait-il ?" -> {{"action":"unknown","date_start":null,"date_end":null,"region":null,"categorie":null}}
 
 Commande : "{text}" """
 
@@ -38,7 +51,30 @@ ton professionnel, en francais) pour la section "{title}" a partir des faits sui
 Commence directement par la synthese, sans titre ni preambule. Ne cite que ces chiffres."""
 
 
-def query_spec(question: str) -> str:
+def qa_narration(question: str, rows: list[dict], spec_desc: str) -> str:
+    """Reformule les donnees brutes en reponse naturelle courte (1-2 phrases)."""
+    rows_str = "\n".join(str(r) for r in rows[:10])
+    return f"""Tu es un assistant analytique retail. L'utilisateur a pose la question suivante :
+"{question}"
+
+La requete interpretee est : {spec_desc}
+
+Donnees brutes obtenues :
+{rows_str}
+
+Redige une reponse courte (1-2 phrases max) en francais, professionnelle et facile a lire,
+qui synthetise les donnees ci-dessus. Mets en valeur les chiffres cles. Ne repete pas la question.
+Reponds UNIQUEMENT avec la phrase de synthese, sans preambule."""
+
+
+def _history_block(history: list[dict] | None) -> str:
+    if not history:
+        return ""
+    lines = "\n".join(f"- {h['role'].capitalize()}: {h['content']}" for h in history)
+    return f"Historique de la conversation (contexte) :\n{lines}\n\n"
+
+
+def query_spec(question: str, history: list[dict] | None = None) -> str:
     regions = ", ".join(f'"{r}"' for r in config.REGIONS)
     categories = ", ".join(f'"{c}"' for c in config.CATEGORIES)
     return f"""Tu es un assistant qui traduit une question en une requete JSON structuree sur des donnees de ventes retail.
@@ -59,6 +95,7 @@ Valeurs autorisees :
 Regles :
 - Si la question mentionne une annee entiere (ex "en 2025"), utilise year et laisse date_start/date_end a null.
 - Si la question mentionne une periode precise (ex "de mars a juin 2025"), utilise date_start/date_end et laisse year a null.
+- Si aucune periode n'est mentionnee et que la question ne porte pas sur une comparaison entre annees, utilise year=2025 par defaut.
 - region et categorie sont null si la question ne filtre pas sur une valeur specifique.
 - Pour "panier moyen" utilise metric="panier_moyen" avec agg="mean".
 - Pour "marge totale" utilise metric="marge" avec agg="sum".
@@ -81,5 +118,6 @@ Question : "evolution du CA mois par mois en 2024 dans le Nord"
 Question : "quelle meteo fait-il ?"
 {{"metric":"ca","agg":"sum","group_by":null,"region":null,"categorie":null,"year":null,"date_start":null,"date_end":null,"sort":"desc","limit":null,"valid":false}}
 
-Question : "{question}"
+
+{_history_block(history)}Question : "{question}"
 """

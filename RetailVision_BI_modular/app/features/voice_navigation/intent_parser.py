@@ -23,7 +23,7 @@ FAST_TRACK = [
     (r"\bsud\b", {"action": "filter", "parameters": {"region": "Sud"}}),
     (r"\bouest\b", {"action": "filter", "parameters": {"region": "Ouest"}}),
     (r"\b(île[- ]de[- ]france|ile[- ]de[- ]france|idf)\b", {"action": "filter", "parameters": {"region": "Île-de-France"}}),
-    (r"\best\b", {"action": "filter", "parameters": {"region": "Est"}}),
+    (r"(?<!c')(?<!n')(?<!qu')\best\b", {"action": "filter", "parameters": {"region": "Est"}}),
     # Filtres catégorie — noms fixes, pas besoin du LLM
     (r"\b(électronique|electronique)\b", {"action": "filter", "parameters": {"categorie": "Électronique"}}),
     (r"\b(vêtements|vetements|vêtement|vetement)\b", {"action": "filter", "parameters": {"categorie": "Vêtements"}}),
@@ -34,6 +34,23 @@ FAST_TRACK = [
 
 _REGIONS_MAP = {r.lower(): r for r in config.REGIONS}
 _CATEGORIES_MAP = {c.lower(): c for c in config.CATEGORIES}
+
+_DATE_RE = re.compile(
+    r"\b(2024|2025|janvier|f[eé]vrier|mars|avril|mai|juin|"
+    r"juillet|ao[uû]t|septembre|octobre|novembre|d[eé]cembre|"
+    r"entre|trimestre|semestre)\b"
+)
+_REGION_RE = re.compile(r"\b(nord|sud|ouest|île[- ]de[- ]france|ile[- ]de[- ]france|idf|(?<!c')(?<!n')(?<!qu')est)\b")
+_CAT_RE = re.compile(r"\b(électronique|electronique|vêtements|vetements|alimentation|alim|maison|sport)\b")
+
+_LLM_VALID_ACTIONS = {"filter", "unknown"}
+
+
+def _is_complex_filter(text: str) -> bool:
+    """Retourne True si le texte contient des dates OU plusieurs entités — le LLM doit tout extraire."""
+    if _DATE_RE.search(text):
+        return True
+    return bool(_REGION_RE.search(text)) and bool(_CAT_RE.search(text))
 
 _FUZZY = [
     ("accueil", {"action": "navigate", "target_page": "Vue Globale"}),
@@ -62,8 +79,11 @@ class IntentParser:
 
     def _fast(self, text):
         n = text.lower().strip()
+        complex_filter = _is_complex_filter(n)
         for pat, res in FAST_TRACK:
             if re.search(pat, n):
+                if res.get("action") == "filter" and complex_filter:
+                    continue  # laisser le LLM extraire l'ensemble (dates + entités)
                 params = res.get("parameters", {})
                 return Intent(pipeline="fast_track", parameters=params,
                               **{k: v for k, v in res.items() if k != "parameters"})
@@ -91,9 +111,12 @@ class IntentParser:
             return Intent(action="unknown",
                           pipeline="llm_unavailable" if res.error == "ollama_unavailable" else "llm_error")
         d = res.data or {}
-        # Validation stricte des entites (anti-hallucination)
+        # Validation stricte — protège contre les injections et hallucinations
+        action = d.get("action", "unknown")
+        if action not in _LLM_VALID_ACTIONS:
+            action = "unknown"
         region = _REGIONS_MAP.get((d.get("region") or "").lower())
         categorie = _CATEGORIES_MAP.get((d.get("categorie") or "").lower())
         params = {"date_start": d.get("date_start"), "date_end": d.get("date_end"),
                   "region": region, "categorie": categorie}
-        return Intent(action=d.get("action", "unknown"), parameters=params, pipeline="llm")
+        return Intent(action=action, parameters=params, pipeline="llm")
