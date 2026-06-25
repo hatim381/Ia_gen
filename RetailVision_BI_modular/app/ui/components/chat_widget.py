@@ -32,20 +32,24 @@ def render(df):
                           label_visibility="collapsed")
         c1, c2 = st.columns([1, 1])
         if c1.button("Envoyer", key="chat_send", use_container_width=True) and q.strip():
-            st.session_state.chat_history.append(("user", q))
-            res = _qa_service().answer(q, df)
-            if res.ok:
-                ans = res.answer or "—"
-                if res.rows:
-                    apercu = ", ".join(f"{list(r.values())[0]}: {list(r.values())[-1]:,.0f}"
-                                       if isinstance(list(r.values())[-1], (int, float)) else str(r)
-                                       for r in res.rows[:3])
-                    ans += f"\n\n_{apercu}_"
-            else:
-                ans = (res.error or "Indisponible.") + (
-                    "\n\n_Si ça persiste : Ollama doit tourner et le modèle être téléchargé "
-                    "(`ollama pull gemma3:4b`)._")
-            st.session_state.chat_history.append(("assistant", ans))
+            # Dédoublonnage : évite d'ajouter la même question si le bouton est recliqué
+            last_user = next((m for r, m in reversed(st.session_state.chat_history) if r == "user"), None)
+            if last_user != q:
+                st.session_state.chat_history.append(("user", q))
+                with st.spinner("Analyse en cours…"):
+                    res = _qa_service().answer(q, df)
+                if res.ok:
+                    ans = res.answer or "—"
+                    if res.rows:
+                        apercu = ", ".join(
+                            f"{list(r.values())[0]}: {list(r.values())[-1]:,.0f}"
+                            if isinstance(list(r.values())[-1], (int, float)) else str(r)
+                            for r in res.rows[:3])
+                        ans += f"\n\n_{apercu}_"
+                else:
+                    ans = f"Erreur : {res.error or 'indisponible'}"
+                st.session_state.chat_history.append(("assistant", ans))
+            st.session_state.chat_q = ""
             st.rerun()
         if c2.button("Effacer", key="chat_clear", use_container_width=True):
             st.session_state.chat_history = []

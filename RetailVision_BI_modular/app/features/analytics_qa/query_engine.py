@@ -6,9 +6,17 @@ import pandas as pd
 from core import config
 from core.domain.models import QuerySpec, QueryResult
 
-METRICS = {"ca", "transactions", "marge_pct"}
+METRICS = {"ca", "transactions", "marge_pct", "panier_moyen", "marge"}
 AGGS = {"sum": "sum", "mean": "mean", "max": "max", "min": "min"}
 GROUPS = {"region": "region", "categorie": "categorie", "mois": "mois"}
+
+_FMT = {
+    "marge_pct":    lambda v: f"{v*100:.1f}%",
+    "marge":        lambda v: f"{v:,.0f} €",
+    "panier_moyen": lambda v: f"{v:.2f} €",
+    "ca":           lambda v: f"{v:,.0f} €",
+    "transactions": lambda v: f"{v:,.0f}",
+}
 
 
 def validate(spec: QuerySpec) -> str | None:
@@ -24,6 +32,13 @@ def validate(spec: QuerySpec) -> str | None:
         return f"catégorie inconnue : {spec.categorie}"
     if spec.year not in (None, 2024, 2025):
         return f"année hors périmètre : {spec.year}"
+    for field in ("date_start", "date_end"):
+        v = getattr(spec, field)
+        if v is not None:
+            try:
+                pd.Timestamp(v)
+            except Exception:
+                return f"{field} invalide : {v}"
     return None
 
 
@@ -32,7 +47,13 @@ def execute(spec: QuerySpec, df: pd.DataFrame) -> QueryResult:
     if err:
         return QueryResult(ok=False, spec=spec, error=err)
     d = df
-    if spec.year:
+    if spec.date_start and spec.date_end:
+        d = d[(d["date"] >= spec.date_start) & (d["date"] <= spec.date_end)]
+    elif spec.date_start:
+        d = d[d["date"] >= spec.date_start]
+    elif spec.date_end:
+        d = d[d["date"] <= spec.date_end]
+    elif spec.year:
         d = d[d["date"].dt.year == spec.year]
     if spec.region:
         d = d[d["region"] == spec.region]
@@ -55,7 +76,8 @@ def execute(spec: QuerySpec, df: pd.DataFrame) -> QueryResult:
     else:
         val = getattr(d[spec.metric], AGGS[spec.agg])()
         rows = [{spec.metric: float(val)}]
-        answer = f"{spec.agg} {spec.metric} = {float(val):,.2f}"
+        fmt = _FMT.get(spec.metric, lambda v: f"{v:,.2f}")
+        answer = f"{spec.metric} ({spec.agg}) : {fmt(float(val))}"
     return QueryResult(ok=True, spec=spec, rows=rows, answer=answer)
 
 
@@ -65,5 +87,6 @@ def _phrase(spec: QuerySpec, rows: list[dict]) -> str:
     top = rows[0]
     key = spec.group_by
     v = top.get(spec.metric, 0)
-    disp = f"{v*100:.1f}%" if spec.metric == "marge_pct" else f"{v:,.0f}"
-    return f"En tête ({spec.agg} {spec.metric}) : {top.get(key)} avec {disp}." if key else f"Résultat : {disp}"
+    fmt = _FMT.get(spec.metric, lambda x: f"{x:,.2f}")
+    label = "En tête" if spec.sort == "desc" else "En bas"
+    return f"{label} ({spec.metric}) : {top.get(key)} avec {fmt(float(v))}." if key else f"Résultat : {fmt(float(v))}"

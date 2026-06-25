@@ -10,9 +10,9 @@ DATE_MIN = "2024-01-01"
 DATE_MAX = "2025-12-31"
 
 # --- LLM (surchargeable par variables d'environnement) ---
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
-JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemma3:4b")
-OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "30"))
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "mistral")
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "240"))
 
 # --- STT Whisper ---
 # Presets pratiques (mettre WHISPER_MODEL a l'une de ces valeurs) :
@@ -40,7 +40,7 @@ WHISPER_PROMPT = (
 # WAKE_MODEL : un mot-cle pre-entraine openWakeWord ("hey_jarvis", "alexa", "hey_mycroft"...)
 # OU le chemin vers un modele .onnx/.tflite custom (ex. "ok dashboard" entraine soi-meme).
 WAKE_ENABLED = os.getenv("WAKE_ENABLED", "1") == "1"
-WAKE_MODEL = os.getenv("WAKE_MODEL", "hey_jarvis")   # ou "alexa", "hey_mycroft"
+WAKE_MODEL = os.getenv("WAKE_MODEL", "alexa")   # ou "alexa", "hey_mycroft"
 WAKE_PHRASE_LABEL = os.getenv("WAKE_PHRASE_LABEL", "ok dashboard")  # libelle affiche a l'utilisateur
 WAKE_THRESHOLD = float(os.getenv("WAKE_THRESHOLD", "0.5"))
 

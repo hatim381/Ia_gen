@@ -35,6 +35,8 @@ class QuerySpec:
     region: str | None = None
     categorie: str | None = None
     year: int | None = None
+    date_start: str | None = None   # YYYY-MM-DD, prioritaire sur year si fourni
+    date_end: str | None = None     # YYYY-MM-DD
     sort: str = "desc"
     limit: int | None = None
     valid: bool = True

@@ -16,12 +16,15 @@ class WakeWordDetector:
         self.available = False
         try:
             from openwakeword.model import Model
+            # tflite_runtime est incompatible avec NumPy 2.x — on force le backend onnxruntime.
+            fw = "onnx"
             if model and (model.endswith(".onnx") or model.endswith(".tflite")) and os.path.exists(model):
-                self._model = Model(wakeword_models=[model])
+                mdl = model.replace(".tflite", ".onnx")
+                self._model = Model(wakeword_models=[mdl], inference_framework=fw)
             elif model:
-                self._model = Model(wakeword_models=[model])
+                self._model = Model(wakeword_models=[model], inference_framework=fw)
             else:
-                self._model = Model()
+                self._model = Model(inference_framework=fw)
             self.available = True
         except Exception:
             self.available = False
