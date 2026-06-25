@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ollama list *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(curl -s http://localhost:8501/healthz)",
+      "Bash(pkill -f \"streamlit run\" 2>/dev/null; sleep 2; streamlit run app/main.py --server.headless true --server.port 8501 &>/tmp/streamlit.log & *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl -s http://localhost:8502/healthz)",
+      "Bash(python3 -c ' *)",
+      "Bash(google-chrome --headless=new --screenshot=/tmp/app_vue_globale.png --window-size=1400,900 --no-sandbox http://localhost:8502)",
+      "Bash(google-chrome --headless=new --screenshot=/tmp/app_vue_globale.png --window-size=1400,900 --no-sandbox --virtual-time-budget=8000 http://localhost:8502)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

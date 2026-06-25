@@ -1,0 +1,561 @@
+[
+  {
+    "model": "gemma3:4b",
+    "timestamp": "2026-06-24T18:17:38.738364",
+    "score_total": "6/7",
+    "score_llm": "3/4",
+    "avg_latency_llm_ms": 15418.9,
+    "scenarios": [
+      {
+        "scenario_id": "T1",
+        "command": "Accueil",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.2662799961399287,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Vue Globale"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T2",
+        "command": "Régions",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.2967870095744729,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Régions"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T3",
+        "command": "Reset les filtres",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.18205901142209768,
+        "raw_output": {
+          "action": "reset",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      },
+      {
+        "scenario_id": "T4",
+        "command": "Affiche les ventes de janvier 2025",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30216.831901983824,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 3
+      },
+      {
+        "scenario_id": "T5",
+        "command": "Région Nord",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 14009.045390994288,
+        "raw_output": {
+          "action": "filter",
+          "target_page": null,
+          "date_start": null,
+          "date_end": null,
+          "region": "Nord",
+          "categorie": null
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T6",
+        "command": "Catégorie Sport entre mars et juin 2024",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 10815.543174976483,
+        "raw_output": {
+          "action": "filter",
+          "target_page": null,
+          "date_start": "2024-03-01",
+          "date_end": "2024-06-30",
+          "region": null,
+          "categorie": "Sport"
+        },
+        "error": "",
+        "entities_correct": 4,
+        "entities_expected": 4
+      },
+      {
+        "scenario_id": "T7",
+        "command": "Météo demain",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 6634.011554997414,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null,
+          "date_start": null,
+          "date_end": null,
+          "region": null,
+          "categorie": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      }
+    ]
+  },
+  {
+    "model": "mistral",
+    "timestamp": "2026-06-24T18:19:39.140234",
+    "score_total": "4/7",
+    "score_llm": "1/4",
+    "avg_latency_llm_ms": 30099.6,
+    "scenarios": [
+      {
+        "scenario_id": "T1",
+        "command": "Accueil",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.0337490055244416,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Vue Globale"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T2",
+        "command": "Régions",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.014788005501031876,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Régions"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T3",
+        "command": "Reset les filtres",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.014759978512302041,
+        "raw_output": {
+          "action": "reset",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      },
+      {
+        "scenario_id": "T4",
+        "command": "Affiche les ventes de janvier 2025",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30100.471669982653,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 3
+      },
+      {
+        "scenario_id": "T5",
+        "command": "Région Nord",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30086.999523016857,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T6",
+        "command": "Catégorie Sport entre mars et juin 2024",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30093.50168000674,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 4
+      },
+      {
+        "scenario_id": "T7",
+        "command": "Météo demain",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 30117.45966700255,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      }
+    ]
+  },
+  {
+    "model": "phi3.5",
+    "timestamp": "2026-06-24T18:20:56.585433",
+    "score_total": "5/7",
+    "score_llm": "2/4",
+    "avg_latency_llm_ms": 19360.6,
+    "scenarios": [
+      {
+        "scenario_id": "T1",
+        "command": "Accueil",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.023342989152297378,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Vue Globale"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T2",
+        "command": "Régions",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.03477701102383435,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Régions"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T3",
+        "command": "Reset les filtres",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.022710999473929405,
+        "raw_output": {
+          "action": "reset",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      },
+      {
+        "scenario_id": "T4",
+        "command": "Affiche les ventes de janvier 2025",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30069.046637014253,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 3
+      },
+      {
+        "scenario_id": "T5",
+        "command": "Région Nord",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 8428.526392992353,
+        "raw_output": {
+          "action": "filter",
+          "target_page": null,
+          "date_start": null,
+          "date_end": null,
+          "region": "Nord",
+          "categorie": null
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T6",
+        "command": "Catégorie Sport entre mars et juin 2024",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30071.402108995244,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 4
+      },
+      {
+        "scenario_id": "T7",
+        "command": "Météo demain",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 8873.55762498919,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null,
+          "date_start": null,
+          "date_end": null,
+          "region": null,
+          "categorie": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      }
+    ]
+  },
+  {
+    "model": "qwen2.5:7b",
+    "timestamp": "2026-06-24T18:22:56.951260",
+    "score_total": "4/7",
+    "score_llm": "1/4",
+    "avg_latency_llm_ms": 30090.8,
+    "scenarios": [
+      {
+        "scenario_id": "T1",
+        "command": "Accueil",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.015200988855212927,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Vue Globale"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T2",
+        "command": "Régions",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.01046698889695108,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Régions"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T3",
+        "command": "Reset les filtres",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.011019001249223948,
+        "raw_output": {
+          "action": "reset",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      },
+      {
+        "scenario_id": "T4",
+        "command": "Affiche les ventes de janvier 2025",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30072.5578609854,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 3
+      },
+      {
+        "scenario_id": "T5",
+        "command": "Région Nord",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30078.08304601349,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T6",
+        "command": "Catégorie Sport entre mars et juin 2024",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30138.325179024832,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 4
+      },
+      {
+        "scenario_id": "T7",
+        "command": "Météo demain",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 30074.32468998013,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      }
+    ]
+  },
+  {
+    "model": "llama3.1",
+    "timestamp": "2026-06-24T18:24:41.005243",
+    "score_total": "4/7",
+    "score_llm": "1/4",
+    "avg_latency_llm_ms": 26012.5,
+    "scenarios": [
+      {
+        "scenario_id": "T1",
+        "command": "Accueil",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.030491006327793002,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Vue Globale"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T2",
+        "command": "Régions",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.022316002286970615,
+        "raw_output": {
+          "action": "navigate",
+          "target_page": "Régions"
+        },
+        "error": "",
+        "entities_correct": 2,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T3",
+        "command": "Reset les filtres",
+        "pipeline": "fast_track",
+        "passed": true,
+        "latency_ms": 0.022739986889064312,
+        "raw_output": {
+          "action": "reset",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      },
+      {
+        "scenario_id": "T4",
+        "command": "Affiche les ventes de janvier 2025",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30130.870112974662,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 3
+      },
+      {
+        "scenario_id": "T5",
+        "command": "Région Nord",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30094.521043996792,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 2
+      },
+      {
+        "scenario_id": "T6",
+        "command": "Catégorie Sport entre mars et juin 2024",
+        "pipeline": "llm",
+        "passed": false,
+        "latency_ms": 30109.70136799733,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null
+        },
+        "error": "",
+        "entities_correct": 0,
+        "entities_expected": 4
+      },
+      {
+        "scenario_id": "T7",
+        "command": "Météo demain",
+        "pipeline": "llm",
+        "passed": true,
+        "latency_ms": 13715.093408012763,
+        "raw_output": {
+          "action": "unknown",
+          "target_page": null,
+          "date_start": null,
+          "date_end": null,
+          "region": null,
+          "categorie": null
+        },
+        "error": "",
+        "entities_correct": 1,
+        "entities_expected": 1
+      }
+    ]
+  }
+]

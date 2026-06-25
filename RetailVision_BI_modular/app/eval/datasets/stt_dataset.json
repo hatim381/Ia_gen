@@ -1,0 +1,12 @@
+{
+  "brick": "stt",
+  "description": "Output quasi-contraint : transcription comparee a une reference (WER/CER). Deposez les .wav dans app/eval/datasets/audio/. Tant qu'un fichier est absent, le cas est marque 'skipped (audio manquant)'.",
+  "cases": [
+    {"id": "S-ID-01", "scenario": "ideal", "audio": "audio/ideal_accueil.wav", "reference": "Accueil"},
+    {"id": "S-ID-02", "scenario": "ideal", "audio": "audio/ideal_region_nord.wav", "reference": "Région Nord"},
+    {"id": "S-ID-03", "scenario": "ideal", "audio": "audio/ideal_janvier_2025.wav", "reference": "Affiche les ventes de janvier 2025"},
+    {"id": "S-RE-01", "scenario": "realistic", "audio": "audio/realistic_bruit_perf.wav", "reference": "Performance"},
+    {"id": "S-RE-02", "scenario": "realistic", "audio": "audio/realistic_oral_sport.wav", "reference": "montre moi le sport"},
+    {"id": "S-AD-01", "scenario": "adverse", "audio": "audio/adverse_silence.wav", "reference": ""}
+  ]
+}

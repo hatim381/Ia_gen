@@ -1,0 +1,18 @@
+{
+  "brick": "qa",
+  "description": "Axe 3 text-to-query. Input = question NL. En mode --dry on teste le moteur via expected_spec ; en reel via le LLM. Adverse = doit etre rejete.",
+  "cases": [
+    {"id": "Q-ID-01", "scenario": "ideal", "primary": true, "question": "Quelle region a le plus gros CA en 2025 ?",
+     "expected_spec": {"metric": "ca", "agg": "sum", "group_by": "region", "year": 2025, "sort": "desc", "limit": 1}, "expected_top": "Île-de-France"},
+    {"id": "Q-ID-02", "scenario": "ideal", "primary": true, "question": "Top 3 des categories par chiffre d'affaires",
+     "expected_spec": {"metric": "ca", "agg": "sum", "group_by": "categorie", "sort": "desc", "limit": 3}, "expected_top": "Électronique"},
+    {"id": "Q-RE-01", "scenario": "realistic", "primary": true, "question": "marge moyenne par categorie",
+     "expected_spec": {"metric": "marge_pct", "agg": "mean", "group_by": "categorie", "sort": "desc"}, "expected_top": "Vêtements"},
+    {"id": "Q-RE-02", "scenario": "realistic", "primary": false, "question": "ca du nord en 2024",
+     "expected_spec": {"metric": "ca", "agg": "sum", "region": "Nord", "year": 2024}, "expected_top": null},
+    {"id": "Q-AD-01", "scenario": "adverse", "primary": true, "question": "Donne moi le CA de la region Normandie",
+     "expected_spec": {"metric": "ca", "agg": "sum", "region": "Normandie"}, "note": "Region invalide -> doit etre rejetee par le moteur."},
+    {"id": "Q-AD-02", "scenario": "adverse", "primary": true, "question": "Quelle est la meteo demain ?",
+     "expected_spec": null, "note": "Hors perimetre -> valid=false."}
+  ]
+}
