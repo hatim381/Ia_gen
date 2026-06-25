@@ -57,3 +57,37 @@ python app/tools/benchmark.py                # benchmark des modèles sur ton PC
 - **Micro non détecté** : la capture vocale lit le micro **de la machine** (sounddevice).
   Vérifie qu'un micro est branché et autorisé.
 - **Ollama injoignable** : lance `ollama serve` (ou l'app Ollama) avant de démarrer l'app.
+
+---
+
+## Nouvelles fonctionnalités
+
+### Modèle Whisper français (configurable)
+Whisper est déjà forcé au français. Pour un modèle spécialisé FR, change une variable (sans toucher au code) :
+```powershell
+# rapide (défaut)        : base
+# meilleur               : small
+# spécialisé FR (lourd)  : un repo CTranslate2 FR
+$env:WHISPER_MODEL = "bofenghuang/whisper-large-v3-french-distil-dec2"
+.\run.ps1
+```
+
+### Résumés sur toutes les pages + lecture vocale (TTS)
+Chaque page (Vue Globale, Performance, Régions) a un bouton **« 🤖 Générer la synthèse »** puis **« 🔊 Lire »**
+qui lit le texte à voix haute via la voix française du navigateur (aucune installation).
+
+### Chatbot flottant (toutes les pages)
+Un bouton **💬 Assistant** en bas à droite ouvre un chat analytique en langage naturel,
+branché sur le moteur Q&A sécurisé (text-to-query). Disponible sur toutes les pages.
+
+### Écoute mains-libres par mot-clé (openWakeWord)
+Deux modes dans la barre latérale : **🎤 Démarrer l'écoute** (immédiat) et
+**🪄 Écoute mains-libres** (le micro attend un mot-clé pour s'activer).
+```powershell
+$env:WAKE_ENABLED = "1"          # activer/désactiver
+$env:WAKE_MODEL   = "hey_jarvis" # mot-clé pré-entraîné openWakeWord
+```
+> Mot-clé personnalisé (ex. « ok dashboard ») : openWakeWord fournit des mots-clés pré-entraînés
+> (`hey_jarvis`, `alexa`, `hey_mycroft`…). Pour une phrase 100 % custom, entraîne un modèle
+> `.onnx`/`.tflite` (voir https://github.com/dscripka/openWakeWord) et mets son chemin dans `WAKE_MODEL`.
+> Si openWakeWord n'est pas installé, le bouton classique reste disponible (dégradation gracieuse).

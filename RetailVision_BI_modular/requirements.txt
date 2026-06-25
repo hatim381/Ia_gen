@@ -11,3 +11,6 @@ streamlit-autorefresh>=0.0.1
 rapidfuzz>=3.0
 jiwer>=3.0
 # optionnel (metrique semantique) : sentence-transformers>=2.2
+# optionnel (mot-cle mains-libres) : openwakeword>=0.6
+#   -> installe-le separement APRES le reste, dans le venv :
+#      .venv\Scripts\python.exe -m pip install openwakeword

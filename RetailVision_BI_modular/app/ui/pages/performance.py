@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from core.data import repository as repo
+from ui.components import narration_block
+
 
 def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame) -> None:
     st.title("Performance")
@@ -12,6 +15,8 @@ def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame) -> None:
     start = st.session_state.filter_date_start.strftime("%d/%m/%Y")
     end = st.session_state.filter_date_end.strftime("%d/%m/%Y")
     st.caption(f"{start} → {end} · {region_label} · {cat_label}")
+
+    narration_block.render("Performance", repo.performance_facts(df_filtered), key="performance")
 
     if df_filtered.empty:
         st.warning("Aucune donnée pour les filtres sélectionnés.")

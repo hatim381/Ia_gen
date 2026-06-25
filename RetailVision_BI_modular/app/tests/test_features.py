@@ -21,8 +21,8 @@ p = IntentParser()
 ok("fast-track Accueil -> navigate", p.parse("Accueil").action == "navigate")
 ok("fast-track Performance -> page", p.parse("perf").target_page == "Performance")
 ok("fast-track reset", p.parse("reset les filtres").action == "reset")
-ok("fast-track assistant", p.parse("assistant").target_page == "Assistant Q&A")
 ok("vide -> unknown", p.parse("").action == "unknown")
+ok("assistant n'est plus une navigation (chat flottant)", p.parse("assistant").target_page != "Assistant Q&A")
 
 # --- Axe 1 : routage pur sur AppState ---
 s = AppState.default()

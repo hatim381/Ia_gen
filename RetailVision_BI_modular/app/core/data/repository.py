@@ -46,3 +46,36 @@ def compute_kpis(df: pd.DataFrame) -> KPISet:
         top_region=y25.groupby("region")["ca"].sum().idxmax() if not y25.empty else "",
         top_categorie=y25.groupby("categorie")["ca"].sum().idxmax() if not y25.empty else "",
     )
+
+
+def performance_facts(df_filtered: "pd.DataFrame") -> list[str]:
+    """Faits chiffres de la page Performance (sur donnees filtrees)."""
+    if df_filtered.empty:
+        return ["Aucune donnee pour les filtres selectionnes."]
+    ca = df_filtered["ca"].sum()
+    tx = df_filtered["transactions"].sum()
+    marge = df_filtered["marge_pct"].mean() * 100
+    top_cat = df_filtered.groupby("categorie")["ca"].sum().idxmax()
+    return [
+        f"CA total filtre : {ca/1e6:.2f} M€",
+        f"Transactions : {tx:,.0f}",
+        f"Marge moyenne : {marge:.1f}%",
+        f"Categorie en tete : {top_cat}",
+    ]
+
+
+def regions_facts(df_filtered: "pd.DataFrame") -> list[str]:
+    """Faits chiffres de la page Regions (sur donnees filtrees)."""
+    if df_filtered.empty:
+        return ["Aucune donnee pour les filtres selectionnes."]
+    par_region = df_filtered.groupby("region")["ca"].sum().sort_values(ascending=False)
+    total = par_region.sum()
+    top = par_region.index[0]
+    part = par_region.iloc[0] / total * 100 if total else 0
+    top_cat = df_filtered.groupby("categorie")["ca"].sum().idxmax()
+    return [
+        f"Region leader : {top} ({part:.0f}% du CA)",
+        f"Nombre de regions actives : {par_region.shape[0]}",
+        f"Categorie dominante : {top_cat}",
+        f"CA total : {total/1e6:.2f} M€",
+    ]

@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from core.data import repository as repo
+from ui.components import narration_block
+
 
 def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame) -> None:
     st.title("Régions")
@@ -10,6 +13,8 @@ def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame) -> None:
     end = st.session_state.filter_date_end.strftime("%d/%m/%Y")
     cat_label = st.session_state.filter_categorie or "toutes catégories"
     st.caption(f"{start} → {end} · {cat_label}")
+
+    narration_block.render("Régions", repo.regions_facts(df_filtered), key="regions")
 
     if df_filtered.empty:
         st.warning("Aucune donnée pour les filtres sélectionnés.")

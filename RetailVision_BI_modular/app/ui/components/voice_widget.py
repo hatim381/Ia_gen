@@ -1,8 +1,9 @@
-"""Composant UI de commande vocale. Depend de la facade VoiceNavigationService."""
+"""Composant UI de commande vocale : bouton classique + ecoute par mot-cle (openWakeWord)."""
 from __future__ import annotations
 import queue as _queue
 import streamlit as st
 
+from core import config
 from ui import state as ui_state
 
 
@@ -21,7 +22,7 @@ def _voice_service():
 def _commands_help():
     with st.expander("Commandes disponibles", expanded=False):
         st.markdown(
-            "**Navigation** : *Accueil*, *Performance*, *Régions*, *Assistant*, *Reset*, *Résumé*\n\n"
+            "**Navigation** : *Accueil*, *Performance*, *Régions*, *Reset*, *Résumé*\n\n"
             "**Filtres** : *Région Nord*, *Catégorie Sport*, *Ventes de janvier 2025*"
         )
 
@@ -34,7 +35,6 @@ def render():
         st.info("Dépendance manquante : streamlit-autorefresh")
         return
 
-    # Un souci micro/VAD (driver, webrtcvad…) ne doit pas écraser tout le dashboard.
     try:
         listener = _listener()
     except Exception as exc:
@@ -47,10 +47,22 @@ def render():
         st.error(f"Erreur micro : {listener.error}")
 
     if listener.is_running:
-        if st.button("⏹ Arrêter l'écoute", use_container_width=True):
+        if listener.armed:
+            st.caption("🔴 Écoute active — dites votre commande")
+        else:
+            st.caption(f"🟡 En veille — dites « {config.WAKE_PHRASE_LABEL} » pour activer")
+        if st.button("⏹ Arrêter", use_container_width=True):
             listener.stop(); st.rerun()
-        st.caption("🔴 Écoute en cours…")
         st_autorefresh(interval=500, key="mic_autorefresh")
+
+        # Evenement mot-cle detecte
+        try:
+            if listener.status_queue.get_nowait() == "wake":
+                st.session_state.stt_message = "🔔 Mot-clé détecté — écoute activée."
+                st.rerun()
+        except _queue.Empty:
+            pass
+        # Commande transcrite
         try:
             transcript = listener.transcript_queue.get_nowait()
             st.session_state.stt_transcript = transcript
@@ -63,7 +75,12 @@ def render():
             pass
     else:
         if st.button("🎤 Démarrer l'écoute", use_container_width=True):
-            listener.start(); st.rerun()
+            listener.start(armed=True); st.rerun()
+        if listener.wake_available:
+            if st.button(f"🪄 Écoute mains-libres (« {config.WAKE_PHRASE_LABEL} »)", use_container_width=True):
+                listener.start(armed=False); st.rerun()
+        else:
+            st.caption("Mode mains-libres indisponible (openWakeWord non installé).")
 
     if st.session_state.stt_transcript:
         st.caption(f"Transcription : *{st.session_state.stt_transcript}*")

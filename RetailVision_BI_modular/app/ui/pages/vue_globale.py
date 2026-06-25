@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from ui.components import tts
+
 from core.data import repository as repo
 
 
@@ -45,6 +47,7 @@ def _render_narrative(kpis: dict):
             except Exception as exc:
                 st.session_state.narrative_text = ""; st.warning(f"Erreur narration : {exc}")
     if st.session_state.get("narrative_text"):
+        tts.read_button(st.session_state.narrative_text, key="read_vue_globale")
         from core import config
         st.markdown(f"""<div style="background:#1E1E2E;border-radius:12px;padding:16px 24px;border-left:4px solid #4F8BF9;margin-bottom:8px">
 <p style="color:#888;font-size:12px;margin:0 0 8px 0">Synthèse générée par {config.OLLAMA_MODEL}</p>
