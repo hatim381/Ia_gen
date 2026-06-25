@@ -18,7 +18,22 @@ FAST_TRACK = [
     (r"\b(enl[eè]ve|supprime|retire|sans)\b.+\br[eé]gion\b", {"action": "clear_filter", "parameters": {"field": "region"}}),
     (r"\b(enl[eè]ve|supprime|retire|sans)\b.+\bcat[eé]gorie\b", {"action": "clear_filter", "parameters": {"field": "categorie"}}),
     (r"\b(enl[eè]ve|supprime|retire|sans)\b.+\b(date|p[eé]riode)\b", {"action": "clear_filter", "parameters": {"field": "dates"}}),
+    # Filtres région — noms fixes, pas besoin du LLM
+    (r"\bnord\b", {"action": "filter", "parameters": {"region": "Nord"}}),
+    (r"\bsud\b", {"action": "filter", "parameters": {"region": "Sud"}}),
+    (r"\bouest\b", {"action": "filter", "parameters": {"region": "Ouest"}}),
+    (r"\b(île[- ]de[- ]france|ile[- ]de[- ]france|idf)\b", {"action": "filter", "parameters": {"region": "Île-de-France"}}),
+    (r"\best\b", {"action": "filter", "parameters": {"region": "Est"}}),
+    # Filtres catégorie — noms fixes, pas besoin du LLM
+    (r"\b(électronique|electronique)\b", {"action": "filter", "parameters": {"categorie": "Électronique"}}),
+    (r"\b(vêtements|vetements|vêtement|vetement)\b", {"action": "filter", "parameters": {"categorie": "Vêtements"}}),
+    (r"\b(alimentation|alim)\b", {"action": "filter", "parameters": {"categorie": "Alimentation"}}),
+    (r"\bmaison\b", {"action": "filter", "parameters": {"categorie": "Maison"}}),
+    (r"\bsport\b", {"action": "filter", "parameters": {"categorie": "Sport"}}),
 ]
+
+_REGIONS_MAP = {r.lower(): r for r in config.REGIONS}
+_CATEGORIES_MAP = {c.lower(): c for c in config.CATEGORIES}
 
 _FUZZY = [
     ("accueil", {"action": "navigate", "target_page": "Vue Globale"}),
@@ -77,8 +92,8 @@ class IntentParser:
                           pipeline="llm_unavailable" if res.error == "ollama_unavailable" else "llm_error")
         d = res.data or {}
         # Validation stricte des entites (anti-hallucination)
-        region = d.get("region") if d.get("region") in config.REGIONS else None
-        categorie = d.get("categorie") if d.get("categorie") in config.CATEGORIES else None
+        region = _REGIONS_MAP.get((d.get("region") or "").lower())
+        categorie = _CATEGORIES_MAP.get((d.get("categorie") or "").lower())
         params = {"date_start": d.get("date_start"), "date_end": d.get("date_end"),
                   "region": region, "categorie": categorie}
         return Intent(action=d.get("action", "unknown"), parameters=params, pipeline="llm")

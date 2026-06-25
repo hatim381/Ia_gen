@@ -1,5 +1,6 @@
 """Configuration centrale — source unique de verite (constantes, modeles, seuils)."""
 import os
+from pathlib import Path
 
 # --- Domaine metier ---
 REGIONS = ["Nord", "Sud", "Est", "Ouest", "Île-de-France"]
@@ -45,3 +46,7 @@ WAKE_PHRASE_LABEL = os.getenv("WAKE_PHRASE_LABEL", "ok dashboard")  # libelle af
 WAKE_THRESHOLD = float(os.getenv("WAKE_THRESHOLD", "0.5"))
 
 DATA_PATH = os.getenv("DATA_PATH", "")
+
+# --- Logs LLM ---
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+LLM_LOG_PATH = os.getenv("LLM_LOG_PATH", str(_PROJECT_ROOT / "logs" / "llm_calls.jsonl"))
