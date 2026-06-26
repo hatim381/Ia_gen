@@ -34,23 +34,27 @@ def render(df):
             st.session_state.chat_history = []
             st.rerun()
 
-        q = st.chat_input("Posez votre question…", key="chat_q")
-        if q:
-            last_user = next((m for r, m in reversed(st.session_state.chat_history) if r == "user"), None)
-            if last_user != q:
-                st.session_state.chat_history.append(("user", q))
-                with st.spinner("Analyse en cours…"):
-                    history = [{"role": r, "content": m} for r, m in st.session_state.chat_history[-6:]]
-                    res = get_qa_service().answer(q, df, history)
-                if res.ok:
-                    ans = res.answer or "—"
-                    if res.rows and res.spec:
-                        apercu = ", ".join(
-                            _fmt_row(r, res.spec.group_by, res.spec.metric)
-                            for r in res.rows[:3]
-                        )
-                        ans += f"\n\n_{apercu}_"
-                else:
-                    ans = f"Erreur : {res.error or 'indisponible'}"
-                st.session_state.chat_history.append(("assistant", ans))
+        # st.chat_input ne se soumet pas de maniere fiable a l'interieur d'un popover
+        # (le rerun referme le popover avant le traitement) -> on utilise un form.
+        with st.form("chat_form", clear_on_submit=True):
+            q = st.text_input("Question", placeholder="Posez votre question…",
+                              label_visibility="collapsed", key="chat_q")
+            submitted = st.form_submit_button("Envoyer ↑", use_container_width=True)
+
+        if submitted and q and q.strip():
+            st.session_state.chat_history.append(("user", q))
+            with st.spinner("Analyse en cours…"):
+                history = [{"role": r, "content": m} for r, m in st.session_state.chat_history[-6:]]
+                res = get_qa_service().answer(q, df, history)
+            if res.ok:
+                ans = res.answer or "—"
+                if res.rows and res.spec:
+                    apercu = ", ".join(
+                        _fmt_row(r, res.spec.group_by, res.spec.metric)
+                        for r in res.rows[:3]
+                    )
+                    ans += f"\n\n_{apercu}_"
+            else:
+                ans = f"Erreur : {res.error or 'indisponible'}"
+            st.session_state.chat_history.append(("assistant", ans))
             st.rerun()

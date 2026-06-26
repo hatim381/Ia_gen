@@ -11,9 +11,12 @@ DATE_MIN = "2024-01-01"
 DATE_MAX = "2025-12-31"
 
 # --- LLM (surchargeable par variables d'environnement) ---
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 JUDGE_MODEL = os.getenv("JUDGE_MODEL", "mistral")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "240"))
+# Duree pendant laquelle Ollama garde le modele en RAM ("-1" = indefiniment).
+# Evite le rechargement (cold start ~100 s sur un 7B) entre deux questions.
+OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 
 # --- STT Whisper ---
 # Presets pratiques (mettre WHISPER_MODEL a l'une de ces valeurs) :

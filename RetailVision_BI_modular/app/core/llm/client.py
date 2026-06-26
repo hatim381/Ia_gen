@@ -42,13 +42,30 @@ class LLMResult:
 
 
 class LLMClient:
-    def __init__(self, model: str | None = None, timeout: int | None = None):
+    def __init__(self, model: str | None = None, timeout: int | None = None,
+                 keep_alive: str | None = None):
         self.model = model or config.OLLAMA_MODEL
         self.timeout = timeout or config.OLLAMA_TIMEOUT
+        self.keep_alive = keep_alive or config.OLLAMA_KEEP_ALIVE
+        self._cli = None
 
     def _client(self):
-        import ollama
-        return ollama.Client(timeout=self.timeout)
+        if self._cli is None:
+            import ollama
+            self._cli = ollama.Client(timeout=self.timeout)
+        return self._cli
+
+    def warmup(self) -> None:
+        """Charge le modele en RAM des le demarrage (evite le cold start sur la 1ere question)."""
+        try:
+            self._client().chat(
+                model=self.model,
+                messages=[{"role": "user", "content": "ok"}],
+                options={"num_predict": 1},
+                keep_alive=self.keep_alive,
+            )
+        except Exception as exc:
+            log.warning("LLM warmup error: %s", exc)
 
     def chat_json(self, prompt: str, num_predict: int = 200) -> LLMResult:
         """Retourne un JSON parse (format=json + grammar sampling)."""
@@ -59,6 +76,7 @@ class LLMClient:
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": 0, "num_predict": num_predict},
                 format="json",
+                keep_alive=self.keep_alive,
             )
             raw = resp["message"]["content"].strip()
             result = LLMResult(ok=True, text=raw, data=json.loads(raw))
@@ -77,6 +95,7 @@ class LLMClient:
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": temperature, "num_predict": num_predict},
+                keep_alive=self.keep_alive,
             )
             result = LLMResult(ok=True, text=resp["message"]["content"].strip())
         except ImportError:
