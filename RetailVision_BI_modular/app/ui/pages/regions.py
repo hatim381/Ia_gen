@@ -11,13 +11,14 @@ def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame) -> None:
     st.title("Régions")
     start = st.session_state.filter_date_start.strftime("%d/%m/%Y")
     end = st.session_state.filter_date_end.strftime("%d/%m/%Y")
+    region_label = st.session_state.filter_region or "toutes régions"
     cat_label = st.session_state.filter_categorie or "toutes catégories"
-    st.caption(f"{start} → {end} · {cat_label}")
+    st.caption(f"📅 {start} → {end}  ·  📍 {region_label}  ·  🏷️ {cat_label}")
 
     narration_block.render("Régions", repo.regions_facts(df_filtered), key="regions")
 
     if df_filtered.empty:
-        st.warning("Aucune donnée pour les filtres sélectionnés.")
+        st.warning("Aucune donnée pour les filtres sélectionnés.", icon="⚠️")
         return
 
     reg_agg = (

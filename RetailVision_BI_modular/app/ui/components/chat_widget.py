@@ -17,29 +17,38 @@ def render(df):
     st.markdown(
         """<style>
         div[data-testid="stPopover"] { position: fixed; bottom: 22px; right: 22px; z-index: 1000; }
-        div[data-testid="stPopover"] button { border-radius: 999px; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
         </style>""",
         unsafe_allow_html=True,
     )
     st.session_state.setdefault("chat_history", [])
 
-    with st.popover("💬 Assistant", use_container_width=False):
-        st.markdown("**Assistant analytique** — posez une question sur les ventes.")
+    n_msgs = len(st.session_state.chat_history)
+    btn_label = f"💬 Assistant ({n_msgs // 2})" if n_msgs >= 2 else "💬 Assistant"
+
+    with st.popover(btn_label, use_container_width=False):
+        st.markdown(
+            """<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+<span style="font-size:20px">🤖</span>
+<div><p style="font-weight:700;margin:0;font-size:15px">Assistant analytique</p>
+<p style="color:#9CA3AF;font-size:11px;margin:0">Posez une question sur les ventes</p></div></div>""",
+            unsafe_allow_html=True,
+        )
+        st.divider()
+
         for role, msg in st.session_state.chat_history[-8:]:
             with st.chat_message(role):
                 st.markdown(msg)
 
-        col_clear, _ = st.columns([1, 3])
-        if col_clear.button("Effacer", key="chat_clear", use_container_width=True):
-            st.session_state.chat_history = []
-            st.rerun()
-
         # st.chat_input ne se soumet pas de maniere fiable a l'interieur d'un popover
         # (le rerun referme le popover avant le traitement) -> on utilise un form.
         with st.form("chat_form", clear_on_submit=True):
-            q = st.text_input("Question", placeholder="Posez votre question…",
+            q = st.text_input("Question", placeholder="Ex : Quel est le CA du Nord en 2025 ?",
                               label_visibility="collapsed", key="chat_q")
-            submitted = st.form_submit_button("Envoyer ↑", use_container_width=True)
+            col_send, col_clear = st.columns([3, 1])
+            submitted = col_send.form_submit_button("Envoyer ↑", use_container_width=True, type="primary")
+            if col_clear.form_submit_button("✕", use_container_width=True):
+                st.session_state.chat_history = []
+                st.rerun()
 
         if submitted and q and q.strip():
             st.session_state.chat_history.append(("user", q))
@@ -48,7 +57,8 @@ def render(df):
                 res = get_qa_service().answer(q, df, history)
             if res.ok:
                 ans = res.answer or "—"
-                if res.rows and res.spec:
+                # Apercu seulement pour les résultats groupés (scalaires déjà formatés dans answer)
+                if res.rows and res.spec and res.spec.group_by:
                     apercu = ", ".join(
                         _fmt_row(r, res.spec.group_by, res.spec.metric)
                         for r in res.rows[:3]

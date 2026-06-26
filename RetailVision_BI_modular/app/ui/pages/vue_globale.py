@@ -15,24 +15,32 @@ def _narration_service():
     return NarrationService()
 
 
-def _kpi_card(col, label, value, delta, positive):
+def _kpi_card(col, label, icon, value, delta, positive):
     color = "#2ECC71" if positive else "#E74C3C"
-    col.markdown(f"""<div style="background:#1E1E2E;border-radius:12px;padding:20px 24px;border-left:4px solid {color}">
-<p style="color:#888;font-size:13px;margin:0">{label}</p>
-<p style="font-size:28px;font-weight:700;margin:4px 0">{value}</p>
-<p style="color:{color};font-size:13px;margin:0">{delta}</p></div>""", unsafe_allow_html=True)
+    arrow = "↑" if positive else "↓"
+    col.markdown(f"""<div style="background:linear-gradient(135deg,#1E1E2E 0%,#252540 100%);border-radius:14px;padding:20px 22px;border-left:4px solid {color};box-shadow:0 4px 20px rgba(0,0,0,0.25);margin-bottom:4px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+  <span style="font-size:20px;line-height:1">{icon}</span>
+  <p style="color:#9CA3AF;font-size:10px;margin:0;text-transform:uppercase;letter-spacing:1px;font-weight:700">{label}</p>
+</div>
+<p style="font-size:27px;font-weight:800;margin:0 0 6px 0;letter-spacing:-0.5px">{value}</p>
+<p style="color:{color};font-size:12px;margin:0;font-weight:500">{arrow} {delta}</p>
+</div>""", unsafe_allow_html=True)
 
 
 def _filter_banner():
     default_start, default_end = pd.Timestamp("2024-01-01"), pd.Timestamp("2025-12-31")
     active = []
-    if st.session_state.get("filter_region"): active.append(f"Région **{st.session_state.filter_region}**")
-    if st.session_state.get("filter_categorie"): active.append(f"Catégorie **{st.session_state.filter_categorie}**")
+    if st.session_state.get("filter_region"): active.append(f"**{st.session_state.filter_region}**")
+    if st.session_state.get("filter_categorie"): active.append(f"**{st.session_state.filter_categorie}**")
     s = st.session_state.get("filter_date_start", default_start); e = st.session_state.get("filter_date_end", default_end)
     if s != default_start or e != default_end: active.append(f"{s:%d/%m/%Y} → {e:%d/%m/%Y}")
     if active:
-        st.info("Filtres actifs : " + " · ".join(active) +
-                "  \n→ Cette page affiche la vue globale. Allez sur **Performance** pour les données filtrées.")
+        st.info(
+            "🔍 Filtres actifs : " + " · ".join(active) +
+            "  \n→ Cette vue reste globale. Consultez **Performance** ou **Régions** pour les données filtrées.",
+            icon="ℹ️",
+        )
 
 
 def _render_narrative(kpis: dict):
@@ -49,10 +57,12 @@ def _render_narrative(kpis: dict):
     if st.session_state.get("narrative_text"):
         tts.read_button(st.session_state.narrative_text, key="read_vue_globale")
         from core import config
-        st.markdown(f"""<div style="background:#1E1E2E;border-radius:12px;padding:16px 24px;border-left:4px solid #4F8BF9;margin-bottom:8px">
-<p style="color:#888;font-size:12px;margin:0 0 8px 0">Synthèse générée par {config.OLLAMA_MODEL}</p>
-<p style="margin:0;line-height:1.6">{html.escape(st.session_state.narrative_text)}</p></div>""",
-                    unsafe_allow_html=True)
+        st.markdown(
+            f"""<div style="background:linear-gradient(135deg,#1E1E2E 0%,#1a2040 100%);border-radius:12px;padding:16px 22px;border-left:4px solid #4F8BF9;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,0.2)">
+<p style="color:#9CA3AF;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin:0 0 8px 0">Synthèse IA — {config.OLLAMA_MODEL}</p>
+<p style="margin:0;line-height:1.7;font-size:14px">{html.escape(st.session_state.narrative_text)}</p></div>""",
+            unsafe_allow_html=True,
+        )
 
 
 def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame):
@@ -63,11 +73,12 @@ def render(df_all: pd.DataFrame, df_filtered: pd.DataFrame):
     k = repo.compute_kpis(df_all)
     st.markdown("### KPIs 2025 vs 2024")
     c1, c2, c3, c4 = st.columns(4)
-    _kpi_card(c1, "CA 2025", f"{k.ca_2025/1e6:.1f} M€", f"{k.ca_delta_pct:+.1f}% vs 2024", k.ca_delta_pct >= 0)
-    _kpi_card(c2, "Transactions", f"{df_all[df_all['date'].dt.year==2025]['transactions'].sum():,.0f}",
+    panier_2025 = df_all[df_all["date"].dt.year == 2025]["panier_moyen"].mean()
+    _kpi_card(c1, "CA 2025", "💰", f"{k.ca_2025/1e6:.1f} M€", f"{k.ca_delta_pct:+.1f}% vs 2024", k.ca_delta_pct >= 0)
+    _kpi_card(c2, "Transactions", "📦", f"{df_all[df_all['date'].dt.year==2025]['transactions'].sum():,.0f}",
               f"{k.tx_delta_pct:+.1f}% vs 2024", k.tx_delta_pct >= 0)
-    _kpi_card(c3, "Marge moy.", f"{k.marge_2025:.1f}%", f"{k.marge_delta_pts:+.2f} pts vs 2024", k.marge_delta_pts >= 0)
-    _kpi_card(c4, "Panier moyen", f"—", f"{k.panier_delta_pct:+.1f}% vs 2024", k.panier_delta_pct >= 0)
+    _kpi_card(c3, "Marge moy.", "📊", f"{k.marge_2025:.1f}%", f"{k.marge_delta_pts:+.2f} pts vs 2024", k.marge_delta_pts >= 0)
+    _kpi_card(c4, "Panier moyen", "🛒", f"{panier_2025:.2f} €", f"{k.panier_delta_pct:+.1f}% vs 2024", k.panier_delta_pct >= 0)
     st.markdown("<br>", unsafe_allow_html=True)
     _render_narrative(k.as_dict())
 

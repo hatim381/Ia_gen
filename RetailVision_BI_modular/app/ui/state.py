@@ -16,6 +16,8 @@ def init():
         "filter_region": None, "filter_categorie": None,
         "stt_transcript": "", "stt_message": "",
         "narrate_requested": False, "narrative_text": "", "qa_result": None,
+        "date_filter_version": 0,  # incremente au reset pour forcer la recreation du widget date
+        "filter_select_version": 0,  # idem pour les selectbox region/categorie
     }
     for k, v in defaults.items():
         st.session_state.setdefault(k, v)

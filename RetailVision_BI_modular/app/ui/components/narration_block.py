@@ -21,14 +21,17 @@ def render(title: str, facts: list[str], key: str):
                 st.session_state[skey] = _service().generate_for(title, facts)
             except Exception as exc:
                 st.session_state[skey] = ""
-                st.warning(f"Erreur narration : {exc}. Vérifiez qu'Ollama tourne et que le "
-                           "modèle est téléchargé (ollama pull gemma3:4b).")
+                st.warning(
+                    f"Erreur narration : {exc}. Vérifiez qu'Ollama tourne et que le modèle est disponible.",
+                    icon="⚠️",
+                )
     text = st.session_state.get(skey, "")
     if text:
         with c2:
             tts.read_button(text, key=f"read_{key}")
         st.markdown(
-            f"""<div style="background:#1E1E2E;border-radius:12px;padding:14px 20px;border-left:4px solid #4F8BF9;margin:6px 0 14px">
-<p style="margin:0;line-height:1.6">{html.escape(text)}</p></div>""",
+            f"""<div style="background:linear-gradient(135deg,#1E1E2E 0%,#1a2040 100%);border-radius:12px;padding:16px 22px;border-left:4px solid #4F8BF9;margin:6px 0 16px;box-shadow:0 2px 12px rgba(0,0,0,0.2)">
+<p style="color:#9CA3AF;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin:0 0 8px 0">Synthèse IA</p>
+<p style="margin:0;line-height:1.7;font-size:14px">{html.escape(text)}</p></div>""",
             unsafe_allow_html=True,
         )
